@@ -1,0 +1,23 @@
+#ignore artifacts
+coverage
+node_modules
+
+#ignore docs and resources
+docs
+rsc
+
+#ingore min files
+*.min.js
+
+#ignore html files
+*.html
+
+#ignore misc files
+.babelrc
+.gitignore
+.prettierignore
+.prettierrc.json
+package.json
+package-lock.json
+LICENSE
+README.md
