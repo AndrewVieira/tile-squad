@@ -1,4 +1,5 @@
 import MainMenuScene from "./scenes/main-menu.js";
+import PuzzleScene from "./scenes/puzzle.js";
 
 const config = {
   type: Phaser.AUTO,
@@ -13,7 +14,7 @@ const config = {
     height: 360,
     parent: "game",
   },
-  scene: [MainMenuScene],
+  scene: [MainMenuScene, PuzzleScene],
 };
 
 const game = new Phaser.Game(config);
