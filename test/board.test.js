@@ -91,3 +91,23 @@ test("remove a piece from board", () => {
   board.removePiece(2, 1);
   expect(board.objects.length).toBe(0);
 });
+
+test("make a dijkstra map to target", () => {
+  const solution = [
+    [7, 6, 7, 6],
+    [6, 5, -1, 5],
+    [5, 4, 3, 4],
+    [4, 3, 2, 3],
+    [3, 2, 1, 2],
+    [2, 1, 0, 1],
+  ];
+
+  const board = new Board(4, 6);
+
+  board.addPiece(PieceType.Thief, 2, 5);
+  board.addPiece(PieceType.Skeleton, 3, 3);
+  board.addPiece(PieceType.Wall, 2, 1);
+
+  const map = board.makeDijsktaMap([PieceType.Warrior, PieceType.Thief, PieceType.Wizard], [PieceType.Wall]);
+  expect(map.join(",")).toBe(solution.join(","));
+});

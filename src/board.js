@@ -219,6 +219,56 @@ class Board {
       }
     }
   }
+
+  makeDijsktaMap(targets, impassables) {
+    let map = [];
+    for (let col = 0; col < this.width; col++) {
+      map.push([]);
+      for (let row = 0; row < this.height; row++) {
+        map[col].push(999);
+      }
+    }
+
+    for (const ally of this.allies) {
+      if (ally.type in targets) {
+        map[ally.x][ally.y] = 0;
+
+      }
+      else if (ally.type in impassables) {
+        map[ally.x][ally.y] = -1;
+      }
+    }
+
+    for (const enemy of this.enemies) {
+      if (enemy.type in targets) {
+        map[enemy.x][enemy.y] = 0;
+      }
+      else if (enemy.type in impassables) {
+        map[enemy.x][enemy.y] = -1;
+      }
+    }
+
+    for (const object of this.objects) {
+      if (object.type in targets) {
+        map[object.x][object.y] = 0;
+      }
+      else if (object.type in impassables) {
+        map[object.x][object.y] = -1;
+      }
+    }
+
+    let iterations = this.width + this.height;
+
+    /*while (iterations > 0) {
+      for (let row = 0; row < this.width; row++) {
+        for (let col = 0; col < this.height; col++) {
+          if (map[row][col]
+        }
+      }
+    }*/
+
+    return map;
+  }
 }
 
 export { PieceType, Direction, Piece, Board };
