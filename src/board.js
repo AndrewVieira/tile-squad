@@ -165,6 +165,34 @@ class DijkstraMap {
   getIndex(x, y) {
     return y * this.width + x;
   }
+
+  getCoords(index) {
+    const coords = {};
+    coords.x = index % this.width;
+    coords.y = (index - coords.x) / this.width;
+    return coords;
+  }
+
+  getDirection(origin, target) {
+    const originCoords = this.getCoords(origin);
+    const targetCoords = this.getCoords(target);
+
+    if (originCoords.x + 1 === targetCoords.x) {
+      return Direction.Right;
+    }
+
+    if (originCoords.x - 1 === targetCoords.x) {
+      return Direction.Left;
+    }
+
+    if (originCoords.y + 1 === targetCoords.y) {
+      return Direction.Down;
+    }
+
+    if (originCoords.y - 1 === targetCoords.y) {
+      return Direction.Up;
+    }
+  }
 }
 
 class Board {
@@ -195,7 +223,39 @@ class Board {
     }
   }
 
-  updateEnemies(direction) {}
+  updateEnemies(direction) {
+    for (const enemy of this.enemies) {
+      const map = new DijkstraMap(
+        this,
+        [PieceType.Warrior, PieceType.Thief, PieceType.Wizard],
+        [PieceType.Wall, PieceType.Skeleton]
+      );
+
+      if (enemy.type === PieceType.Skeleton) {
+        const index = map.getIndex(enemy.x, enemy.y);
+        const neighbors = map.findNeighbors(index);
+
+        let lowest = 999;
+        let target = -1;
+
+        for (const neighbor of neighbors) {
+          if (map.map[neighbor] > -1 && map.map[neighbor] < lowest) {
+            lowest = map.map[neighbor];
+            target = neighbor;
+          }
+        }
+
+        console.log(index);
+        console.log(target);
+
+        if (target > -1) {
+          const enemyDirection = map.getDirection(index, target);
+          console.log("Direction:", enemyDirection);
+          this.movePiece(enemy, enemyDirection);
+        }
+      }
+    }
+  }
 
   getCell(x, y) {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
@@ -224,6 +284,10 @@ class Board {
   }
 
   movePiece(piece, direction) {
+    if (direction == undefined) {
+      return;
+    }
+
     const x = piece.x + MoveMapX[direction];
     const y = piece.y + MoveMapY[direction];
 
