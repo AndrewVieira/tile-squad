@@ -1,4 +1,10 @@
-import { PieceType, Piece, Direction, Board } from "../src/board.js";
+import {
+  PieceType,
+  Piece,
+  Direction,
+  DijkstraMap,
+  Board,
+} from "../src/board.js";
 
 test("piece constructor", () => {
   const piece = new Piece(PieceType.Wizard, 2, 4);
@@ -108,9 +114,10 @@ test("make a dijkstra map to target", () => {
   board.addPiece(PieceType.Skeleton, 3, 3);
   board.addPiece(PieceType.Wall, 2, 1);
 
-  const map = board.makeDijsktaMap(
+  const map = new DijkstraMap(
+    board,
     [PieceType.Warrior, PieceType.Thief, PieceType.Wizard],
     [PieceType.Wall]
   );
-  expect(map.join(",")).toBe(solution.join(","));
+  expect(map.map.join(",")).toBe(solution.join(","));
 });

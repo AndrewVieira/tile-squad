@@ -85,6 +85,88 @@ class Piece {
   }
 }
 
+class DijkstraMap {
+  map;
+  width;
+  height;
+  area;
+
+  constructor(board, targets, impassables) {
+    this.map = [];
+    this.width = board.width;
+    this.height = board.height;
+    this.area = this.width * this.height;
+
+    for (let index = 0; index < this.area; index++) {
+      this.map.push(999);
+    }
+
+    this.markTargets(board.allies, targets, impassables);
+    this.markTargets(board.enemies, targets, impassables);
+    this.markTargets(board.objects, targets, impassables);
+
+    const iterations = this.width + this.height;
+    this.flood(iterations);
+  }
+
+  markTargets(pieces, targets, impassables) {
+    for (const piece of pieces) {
+      if (targets.includes(piece.type)) {
+        this.map[this.getIndex(piece.x, piece.y)] = 0;
+      } else if (impassables.includes(piece.type)) {
+        this.map[this.getIndex(piece.x, piece.y)] = -1;
+      }
+    }
+  }
+
+  findNeighbors(index) {
+    if (index < 0 || index >= this.area) {
+      return [];
+    }
+
+    const neighbors = [];
+
+    if (index - this.width >= 0) {
+      neighbors.push(index - this.width);
+    }
+
+    if (index + this.width < this.map.length) {
+      neighbors.push(index + this.width);
+    }
+
+    const x = index % this.width;
+
+    if (x - 1 >= 0) {
+      neighbors.push(index - 1);
+    }
+
+    if (x + 1 < this.width) {
+      neighbors.push(index + 1);
+    }
+
+    return neighbors;
+  }
+
+  flood(iterations) {
+    for (let i = 0; i < iterations; i++) {
+      for (let index = 0; index < this.area; index++) {
+        if (this.map[index] === i) {
+          const neighbors = this.findNeighbors(index);
+          for (const neighbor of neighbors) {
+            if (this.map[neighbor] > i + 1) {
+              this.map[neighbor] = i + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  getIndex(x, y) {
+    return y * this.width + x;
+  }
+}
+
 class Board {
   width;
   height;
@@ -219,68 +301,6 @@ class Board {
       }
     }
   }
-
-  makeDijsktaMap(targets, impassables) {
-    let map = [];
-    for (let row = 0; row < this.height; row++) {
-      map.push([]);
-      for (let col = 0; col < this.width; col++) {
-        map[row].push(999);
-      }
-    }
-
-    for (const ally of this.allies) {
-      if (targets.includes(ally.type)) {
-        map[ally.y][ally.x] = 0;
-      } else if (impassables.includes(impassables)) {
-        map[ally.y][ally.x] = -1;
-      }
-    }
-
-    for (const enemy of this.enemies) {
-      if (targets.includes(targets)) {
-        map[enemy.y][enemy.x] = 0;
-      } else if (impassables.includes(enemy.type)) {
-        map[enemy.y][enemy.x] = -1;
-      }
-    }
-
-    for (const object of this.objects) {
-      if (targets.includes(targets)) {
-        map[object.y][object.x] = 0;
-      } else if (impassables.includes(object.type)) {
-        map[object.y][object.x] = -1;
-      }
-    }
-
-    const iterations = this.width + this.height;
-
-    for (let i = 0; i < iterations; i++) {
-      for (let row = 0; row < this.height; row++) {
-        for (let col = 0; col < this.width; col++) {
-          if (map[row][col] === i) {
-            if (row - 1 >= 0 && map[row - 1][col] > i + 1) {
-              map[row - 1][col] = i + 1;
-            }
-
-            if (row + 1 < map.length && map[row + 1][col] > i + 1) {
-              map[row + 1][col] = i + 1;
-            }
-
-            if (col - 1 >= 0 && map[row][col - 1] > i + 1) {
-              map[row][col - 1] = i + 1;
-            }
-
-            if (col + 1 < map[row].length && map[row][col + 1] > i + 1) {
-              map[row][col + 1] = i + 1;
-            }
-          }
-        }
-      }
-    }
-
-    return map;
-  }
 }
 
-export { PieceType, Direction, Piece, Board };
+export { PieceType, Direction, Piece, DijkstraMap, Board };
