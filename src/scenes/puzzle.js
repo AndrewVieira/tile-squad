@@ -9,19 +9,36 @@ class PuzzleScene extends Phaser.Scene {
   pieceRects;
 
   menuButton;
+  pieceGraphicsMap;
+
+  gridOverlay;
+  victoryMessage;
+  defeatMessage;
 
   constructor() {
     super("PuzzleScene");
+    this.puzzleState = "loading";
   }
 
-  preload() {}
+  preload() {
+    this.pieceGraphicsMap = {};
+    this.pieceGraphicsMap[PieceType.OffBoard] = 0x000000;
+    this.pieceGraphicsMap[PieceType.Empty] = 0x000000;
+    this.pieceGraphicsMap[PieceType.Wall] = 0x00ff00;
+    this.pieceGraphicsMap[PieceType.Warrior] = 0x0000ff;
+    this.pieceGraphicsMap[PieceType.Thief] = 0x00ffff;
+    this.pieceGraphicsMap[PieceType.Wizard] = 0xff8800;
+    this.pieceGraphicsMap[PieceType.Skeleton] = 0xff0000;
+    this.pieceGraphicsMap[PieceType.Treasure] = 0xffff00;
+  }
 
   create() {
     this.board = new Board(8, 4);
-    this.board.addPiece(PieceType.Warrior, 2, 2);
     this.board.addPiece(PieceType.Thief, 1, 1);
     this.board.addPiece(PieceType.Wall, 4, 3);
     this.board.addPiece(PieceType.Skeleton, 7, 3);
+    this.board.addPiece(PieceType.Wizard, 2, 0);
+    this.board.addPiece(PieceType.Treasure, 7, 0);
 
     this.grid = [];
 
@@ -38,24 +55,32 @@ class PuzzleScene extends Phaser.Scene {
       }
     }
 
+    this.gridOverlay = new Phaser.Geom.Rectangle(16, 16, 32 * this.board.width - 1, 32 * this.board.height);
+
+    this.victoryMessage = this.add
+      .text(20, 20, "You Win!", { fill: "#fff", align: "center" })
+      .setDepth(1)
+      .setVisible(false);
+    
+    this.defeatMessage = this.add
+      .text(20, 20, "You Lost!", { fill: "#fff", align: "center" })
+      .setDepth(1)
+      .setVisible(false);
+
     this.input.keyboard.on("keyup-UP", (event) => {
       this.board.updateBoardState(Direction.Up);
-      console.log("up");
     });
 
     this.input.keyboard.on("keyup-DOWN", (event) => {
       this.board.updateBoardState(Direction.Down);
-      console.log("down");
     });
 
     this.input.keyboard.on("keyup-LEFT", (event) => {
       this.board.updateBoardState(Direction.Left);
-      console.log("left");
     });
 
     this.input.keyboard.on("keyup-RIGHT", (event) => {
       this.board.updateBoardState(Direction.Right);
-      console.log("right");
     });
 
     this.menuButton = new TextButton(
@@ -68,6 +93,8 @@ class PuzzleScene extends Phaser.Scene {
     ).on("pointerdown", () => {
       this.scene.start("MainMenuScene");
     });
+
+    this.puzzleState = "playing";
   }
 
   update(time, delta) {
@@ -75,6 +102,14 @@ class PuzzleScene extends Phaser.Scene {
 
     this.drawGrid();
     this.drawPieces();
+
+    const state = this.board.getState();
+
+    if (state === "defeat") {
+      this.drawDefeatMessage();
+    } else if (state === "victory") {
+      this.drawVictoryMessage();
+    }
   }
 
   drawGrid() {
@@ -88,24 +123,17 @@ class PuzzleScene extends Phaser.Scene {
   drawPieces() {
     this.pieceRects = [];
 
-    this.preparePieces(this.board.allies);
-    this.preparePieces(this.board.enemies);
-    this.preparePieces(this.board.objects);
+    this.prepareDrawingPieces(this.board.objects);
+    this.prepareDrawingPieces(this.board.allies);
+    this.prepareDrawingPieces(this.board.enemies);
 
     for (const piece of this.pieceRects) {
-      if (piece.type === PieceType.Wall) {
-        this.graphics.fillStyle(0x00ff00);
-      } else if (EnemySet.has(piece.type)) {
-        this.graphics.fillStyle(0xff0000);
-      } else {
-        this.graphics.fillStyle(0x0000ff);
-      }
-
+      this.graphics.fillStyle(this.pieceGraphicsMap[piece.type]);
       this.graphics.fillRectShape(piece.rect);
     }
   }
 
-  preparePieces(pieces) {
+  prepareDrawingPieces(pieces) {
     for (const piece of pieces) {
       const rect = {
         type: piece.type,
@@ -121,6 +149,18 @@ class PuzzleScene extends Phaser.Scene {
 
       this.pieceRects.push(rect);
     }
+  }
+
+  drawDefeatMessage() {
+    this.graphics.fillStyle(0xff0000);
+    this.graphics.fillRectShape(this.gridOverlay);
+    this.defeatMessage.setVisible(true);
+  }
+  
+  drawVictoryMessage() {
+    this.graphics.fillStyle(0x0000ff);
+    this.graphics.fillRectShape(this.gridOverlay);
+    this.victoryMessage.setVisible(true);
   }
 }
 

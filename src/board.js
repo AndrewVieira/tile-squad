@@ -22,6 +22,10 @@ const Direction = {
   Down: 1,
   Left: 2,
   Right: 3,
+  UpLeft: 4,
+  UpRight: 5,
+  DownLeft: 6,
+  DownRight: 7
 };
 
 const MoveMapX = {};
@@ -29,12 +33,23 @@ MoveMapX[Direction.Up] = 0;
 MoveMapX[Direction.Down] = 0;
 MoveMapX[Direction.Left] = -1;
 MoveMapX[Direction.Right] = 1;
+MoveMapX[Direction.UpLeft] = -1;
+MoveMapX[Direction.UpRight] = 1;
+MoveMapX[Direction.DownLeft] = -1;
+MoveMapX[Direction.DownRight] = 1;
 
 const MoveMapY = {};
 MoveMapY[Direction.Up] = -1;
 MoveMapY[Direction.Down] = 1;
 MoveMapY[Direction.Left] = 0;
 MoveMapY[Direction.Right] = 0;
+MoveMapY[Direction.UpLeft] = 1;
+MoveMapY[Direction.UpRight] = 1;
+MoveMapY[Direction.DownLeft] = -1;
+MoveMapY[Direction.DownRight] = -1;
+
+const StandardMoveSet = [Direction.Up, Direction.Down, Direction.Left, Direction.Right];
+const DiagonalMoveSet = [Direction.Up, Direction.Down, Direction.Left, Direction.Right, Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight];
 
 const Interaction = {
   None: 0,
@@ -72,6 +87,8 @@ InteractionTable[tuplify(PieceType.Skeleton, PieceType.Thief)] =
   Interaction.Kill;
 InteractionTable[tuplify(PieceType.Skeleton, PieceType.Wizard)] =
   Interaction.Kill;
+InteractionTable[tuplify(PieceType.Skeleton, PieceType.Treasure)] =
+  Interaction.Move;
 
 class Piece {
   type;
@@ -203,6 +220,8 @@ class Board {
   enemies;
   objects;
 
+  state;
+
   constructor(width, height) {
     this.width = width;
     this.height = height;
@@ -210,11 +229,21 @@ class Board {
     this.allies = [];
     this.enemies = [];
     this.objects = [];
+
+    this.state = "playing";
   }
 
   updateBoardState(direction) {
+    if (this.state !== "playing") {
+      return;
+    }
+
     this.updateAllies(direction);
     this.updateEnemies(direction);
+
+    if (this.allies.length === 0) {
+      this.state = "defeat";
+    }
   }
 
   updateAllies(direction) {
@@ -312,6 +341,9 @@ class Board {
         break;
 
       case Interaction.Wins:
+        piece.x = x;
+        piece.y = y;
+        this.state = "victory";
         break;
 
       default:
@@ -364,6 +396,10 @@ class Board {
         return;
       }
     }
+  }
+
+  getState() {
+    return this.state;
   }
 }
 
