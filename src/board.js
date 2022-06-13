@@ -244,7 +244,7 @@ class Board {
         break;
 
       case Interaction.Dies:
-        this.removePiece(x, y);
+        this.removePiece(piece.x, piece.y);
         break;
 
       case Interaction.Wins:
@@ -303,4 +303,4 @@ class Board {
   }
 }
 
-export { PieceType, Direction, Piece, DijkstraMap, Board };
+export { PieceType, AllySet, EnemySet, Direction, Piece, DijkstraMap, Board };

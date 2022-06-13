@@ -1,11 +1,11 @@
-import { PieceType, Direction, Piece, Board } from "./../board.js";
+import { PieceType, EnemySet, Direction, Piece, Board } from "./../board.js";
 import { TextButton } from "../gui/text-button.js";
 
 class PuzzleScene extends Phaser.Scene {
   board;
 
   graphics;
-  rectangles;
+  grid;
   pieceRects;
 
   menuButton;
@@ -21,16 +21,18 @@ class PuzzleScene extends Phaser.Scene {
     this.board.addPiece(PieceType.Warrior, 2, 2);
     this.board.addPiece(PieceType.Thief, 1, 1);
     this.board.addPiece(PieceType.Wall, 4, 3);
+    this.board.addPiece(PieceType.Skeleton, 7, 3);
+
+    this.grid = [];
 
     this.graphics = this.add.graphics({
       lineStyle: { width: 2, color: 0x00ff00 },
       fillStyle: { color: 0xff0000 },
     });
-    this.rectangles = [];
 
     for (let x = 0; x < this.board.width; x++) {
       for (let y = 0; y < this.board.height; y++) {
-        this.rectangles.push(
+        this.grid.push(
           new Phaser.Geom.Rectangle(16 + x * 32, 16 + y * 32, 32, 32)
         );
       }
@@ -71,38 +73,53 @@ class PuzzleScene extends Phaser.Scene {
   update(time, delta) {
     this.graphics.clear();
 
+    this.drawGrid();
+    this.drawPieces();
+  }
+
+  drawGrid() {
+    this.graphics.lineStyle(2, 0x00ff00);
+
+    for (let i = 0; i < this.grid.length; i++) {
+      this.graphics.strokeRectShape(this.grid[i]);
+    }
+  }
+
+  drawPieces() {
     this.pieceRects = [];
 
-    for (let i = 0; i < this.rectangles.length; i++) {
-      this.graphics.strokeRectShape(this.rectangles[i]);
-    }
+    this.preparePieces(this.board.allies);
+    this.preparePieces(this.board.enemies);
+    this.preparePieces(this.board.objects);
 
-    for (let i = 0; i < this.board.allies.length; i++) {
-      const target = this.board.allies[i];
-      this.pieceRects.push(
-        new Phaser.Geom.Rectangle(
-          24 + 32 * target.x,
-          24 + 32 * target.y,
-          16,
-          16
-        )
+    for (const piece of this.pieceRects) {
+      if (piece.type === PieceType.Wall) {
+        this.graphics.fillStyle(0x00ff00);
+      } else if (EnemySet.has(piece.type)) {
+        this.graphics.fillStyle(0xff0000);
+      } else {
+        this.graphics.fillStyle(0x0000ff);
+      }
+
+      this.graphics.fillRectShape(piece.rect);
+    }
+  }
+
+  preparePieces(pieces) {
+    for (const piece of pieces) {
+      const rect = {
+        type: piece.type,
+        rect: 0,
+      };
+
+      rect.rect = new Phaser.Geom.Rectangle(
+        24 + 32 * piece.x,
+        24 + 32 * piece.y,
+        16,
+        16
       );
-    }
 
-    for (let i = 0; i < this.board.objects.length; i++) {
-      const target = this.board.objects[i];
-      this.pieceRects.push(
-        new Phaser.Geom.Rectangle(
-          24 + 32 * target.x,
-          24 + 32 * target.y,
-          16,
-          16
-        )
-      );
-    }
-
-    for (let i = 0; i < this.pieceRects.length; i++) {
-      this.graphics.strokeRectShape(this.pieceRects[i]);
+      this.pieceRects.push(rect);
     }
   }
 }
