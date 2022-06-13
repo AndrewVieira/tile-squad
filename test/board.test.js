@@ -108,6 +108,9 @@ test("make a dijkstra map to target", () => {
   board.addPiece(PieceType.Skeleton, 3, 3);
   board.addPiece(PieceType.Wall, 2, 1);
 
-  const map = board.makeDijsktaMap([PieceType.Warrior, PieceType.Thief, PieceType.Wizard], [PieceType.Wall]);
+  const map = board.makeDijsktaMap(
+    [PieceType.Warrior, PieceType.Thief, PieceType.Wizard],
+    [PieceType.Wall]
+  );
   expect(map.join(",")).toBe(solution.join(","));
 });

@@ -1,4 +1,5 @@
 import { PieceType, Direction, Piece, Board } from "./../board.js";
+import { TextButton } from "../gui/text-button.js";
 
 class PuzzleScene extends Phaser.Scene {
   board;
@@ -55,12 +56,14 @@ class PuzzleScene extends Phaser.Scene {
       console.log("right");
     });
 
-    this.menuButton = this.add.text(300, 20, "Return to Menu", {
-      fill: "#0f0",
-    });
-    this.menuButton.setInteractive();
-
-    this.menuButton.on("pointerdown", () => {
+    this.menuButton = new TextButton(
+      this,
+      "Return to Menu",
+      300,
+      20,
+      200,
+      50
+    ).on("pointerdown", () => {
       this.scene.start("MainMenuScene");
     });
   }

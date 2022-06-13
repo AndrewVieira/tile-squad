@@ -222,50 +222,62 @@ class Board {
 
   makeDijsktaMap(targets, impassables) {
     let map = [];
-    for (let col = 0; col < this.width; col++) {
+    for (let row = 0; row < this.height; row++) {
       map.push([]);
-      for (let row = 0; row < this.height; row++) {
-        map[col].push(999);
+      for (let col = 0; col < this.width; col++) {
+        map[row].push(999);
       }
     }
 
     for (const ally of this.allies) {
-      if (ally.type in targets) {
-        map[ally.x][ally.y] = 0;
-
-      }
-      else if (ally.type in impassables) {
-        map[ally.x][ally.y] = -1;
+      if (targets.includes(ally.type)) {
+        map[ally.y][ally.x] = 0;
+      } else if (impassables.includes(impassables)) {
+        map[ally.y][ally.x] = -1;
       }
     }
 
     for (const enemy of this.enemies) {
-      if (enemy.type in targets) {
-        map[enemy.x][enemy.y] = 0;
-      }
-      else if (enemy.type in impassables) {
-        map[enemy.x][enemy.y] = -1;
+      if (targets.includes(targets)) {
+        map[enemy.y][enemy.x] = 0;
+      } else if (impassables.includes(enemy.type)) {
+        map[enemy.y][enemy.x] = -1;
       }
     }
 
     for (const object of this.objects) {
-      if (object.type in targets) {
-        map[object.x][object.y] = 0;
-      }
-      else if (object.type in impassables) {
-        map[object.x][object.y] = -1;
+      if (targets.includes(targets)) {
+        map[object.y][object.x] = 0;
+      } else if (impassables.includes(object.type)) {
+        map[object.y][object.x] = -1;
       }
     }
 
-    let iterations = this.width + this.height;
+    const iterations = this.width + this.height;
 
-    /*while (iterations > 0) {
-      for (let row = 0; row < this.width; row++) {
-        for (let col = 0; col < this.height; col++) {
-          if (map[row][col]
+    for (let i = 0; i < iterations; i++) {
+      for (let row = 0; row < this.height; row++) {
+        for (let col = 0; col < this.width; col++) {
+          if (map[row][col] === i) {
+            if (row - 1 >= 0 && map[row - 1][col] > i + 1) {
+              map[row - 1][col] = i + 1;
+            }
+
+            if (row + 1 < map.length && map[row + 1][col] > i + 1) {
+              map[row + 1][col] = i + 1;
+            }
+
+            if (col - 1 >= 0 && map[row][col - 1] > i + 1) {
+              map[row][col - 1] = i + 1;
+            }
+
+            if (col + 1 < map[row].length && map[row][col + 1] > i + 1) {
+              map[row][col + 1] = i + 1;
+            }
+          }
         }
       }
-    }*/
+    }
 
     return map;
   }

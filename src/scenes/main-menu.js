@@ -1,3 +1,5 @@
+import { TextButton } from "../gui/text-button.js";
+
 class MainMenuScene extends Phaser.Scene {
   playButton;
 
@@ -8,17 +10,12 @@ class MainMenuScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.playButton = this.add.text(100, 100, "Play!", { fill: "#0f0" })
-    .setInteractive()
-    .on("pointerdown", () => {
-      this.scene.start("PuzzleScene");
-    })
-    .on("pointerover", () => {
-      this.playButton.setStyle({ fill: "#ff0" });
-    })
-    .on("pointerout", () => {
-      this.playButton.setStyle({ fill: "#0f0" });
-    });
+    this.playButton = new TextButton(this, "Play!", 200, 200, 200, 50).on(
+      "pointerdown",
+      () => {
+        this.scene.start("PuzzleScene");
+      }
+    );
   }
 
   update(time, delta) {}
