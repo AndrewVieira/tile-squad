@@ -29,6 +29,7 @@ class PuzzleScene extends Phaser.Scene {
     this.pieceGraphicsMap[PieceType.Thief] = 0x00ffff;
     this.pieceGraphicsMap[PieceType.Wizard] = 0xff8800;
     this.pieceGraphicsMap[PieceType.Skeleton] = 0xff0000;
+    this.pieceGraphicsMap[PieceType.Slime] = 0xff0000;
     this.pieceGraphicsMap[PieceType.Treasure] = 0xffff00;
   }
 
@@ -39,6 +40,7 @@ class PuzzleScene extends Phaser.Scene {
     this.board.addPiece(PieceType.Skeleton, 7, 3);
     this.board.addPiece(PieceType.Wizard, 2, 0);
     this.board.addPiece(PieceType.Treasure, 7, 0);
+    this.board.addPiece(PieceType.Slime, 0, 0);
 
     this.grid = [];
 

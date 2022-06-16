@@ -10,12 +10,13 @@ const PieceType = {
   Wizard: 5,
 
   Skeleton: 6,
+  Slime: 7,
 
-  Treasure: 7,
+  Treasure: 8,
 };
 
 const AllySet = new Set([PieceType.Warrior, PieceType.Thief, PieceType.Wizard]);
-const EnemySet = new Set([PieceType.Skeleton]);
+const EnemySet = new Set([PieceType.Skeleton, PieceType.Slime]);
 
 const Direction = {
   Up: 0,
@@ -64,17 +65,23 @@ InteractionTable[tuplify(PieceType.Warrior, PieceType.Empty)] =
   Interaction.Move;
 InteractionTable[tuplify(PieceType.Warrior, PieceType.Skeleton)] =
   Interaction.Kill;
+  InteractionTable[tuplify(PieceType.Warrior, PieceType.Slime)] =
+  Interaction.Kill;
 InteractionTable[tuplify(PieceType.Warrior, PieceType.Treasure)] =
   Interaction.Wins;
 
 InteractionTable[tuplify(PieceType.Thief, PieceType.Empty)] = Interaction.Move;
 InteractionTable[tuplify(PieceType.Thief, PieceType.Skeleton)] =
   Interaction.Dies;
+  InteractionTable[tuplify(PieceType.Thief, PieceType.Slime)] =
+  Interaction.Dies;
 InteractionTable[tuplify(PieceType.Thief, PieceType.Treasure)] =
   Interaction.Wins;
 
 InteractionTable[tuplify(PieceType.Wizard, PieceType.Empty)] = Interaction.Move;
 InteractionTable[tuplify(PieceType.Wizard, PieceType.Skeleton)] =
+  Interaction.Dies;
+InteractionTable[tuplify(PieceType.Wizard, PieceType.Slime)] =
   Interaction.Dies;
 InteractionTable[tuplify(PieceType.Wizard, PieceType.Treasure)] =
   Interaction.Wins;
@@ -273,9 +280,6 @@ class Board {
             target = neighbor;
           }
         }
-
-        console.log(index);
-        console.log(target);
 
         if (target > -1) {
           const enemyDirection = map.getDirection(index, target);
