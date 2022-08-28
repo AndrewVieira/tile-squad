@@ -1,4 +1,5 @@
-import { PieceType, EnemySet, Direction, Piece, Board } from "./../board.js";
+import { PieceType, EnemySet, Direction, Piece } from "./../constants/piece.js";
+import { Board } from "./../board.js";
 import { TextButton } from "../gui/text-button.js";
 
 class PuzzleScene extends Phaser.Scene {
@@ -21,24 +22,21 @@ class PuzzleScene extends Phaser.Scene {
   }
 
   preload() {
-    this.pieceGraphicsMap = {};
-    this.pieceGraphicsMap[PieceType.OffBoard] = 0x000000;
-    this.pieceGraphicsMap[PieceType.Empty] = 0x000000;
-    this.pieceGraphicsMap[PieceType.Wall] = 0x00ff00;
-    this.pieceGraphicsMap[PieceType.Warrior] = 0x0000ff;
-    this.pieceGraphicsMap[PieceType.Thief] = 0x00ffff;
-    this.pieceGraphicsMap[PieceType.Wizard] = 0xff8800;
-    this.pieceGraphicsMap[PieceType.Skeleton] = 0xff0000;
-    this.pieceGraphicsMap[PieceType.Slime] = 0xff0000;
-    this.pieceGraphicsMap[PieceType.Treasure] = 0xffff00;
+    // this.load.image('sprites', 'rsc/images/fantasy-tileset.png');
+    this.load.spritesheet("sprites", "rsc/images/fantasy-tileset.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
   }
 
   create() {
-    this.board = new Board(8, 4);
+    //this.add.image(0, 0, "sprites");
+    this.board = new Board(this, 8, 4);
     this.board.addPiece(PieceType.Thief, 1, 1);
     this.board.addPiece(PieceType.Wall, 4, 3);
     this.board.addPiece(PieceType.Skeleton, 7, 3);
     this.board.addPiece(PieceType.Wizard, 2, 0);
+    this.board.addPiece(PieceType.Warrior, 3, 0);
     this.board.addPiece(PieceType.Treasure, 7, 0);
     this.board.addPiece(PieceType.Slime, 0, 0);
 
@@ -57,13 +55,18 @@ class PuzzleScene extends Phaser.Scene {
       }
     }
 
-    this.gridOverlay = new Phaser.Geom.Rectangle(16, 16, 32 * this.board.width - 1, 32 * this.board.height);
+    this.gridOverlay = new Phaser.Geom.Rectangle(
+      16,
+      16,
+      32 * this.board.width - 1,
+      32 * this.board.height
+    );
 
     this.victoryMessage = this.add
       .text(20, 20, "You Win!", { fill: "#fff", align: "center" })
       .setDepth(1)
       .setVisible(false);
-    
+
     this.defeatMessage = this.add
       .text(20, 20, "You Lost!", { fill: "#fff", align: "center" })
       .setDepth(1)
@@ -103,7 +106,6 @@ class PuzzleScene extends Phaser.Scene {
     this.graphics.clear();
 
     this.drawGrid();
-    this.drawPieces();
 
     const state = this.board.getState();
 
@@ -122,43 +124,12 @@ class PuzzleScene extends Phaser.Scene {
     }
   }
 
-  drawPieces() {
-    this.pieceRects = [];
-
-    this.prepareDrawingPieces(this.board.objects);
-    this.prepareDrawingPieces(this.board.allies);
-    this.prepareDrawingPieces(this.board.enemies);
-
-    for (const piece of this.pieceRects) {
-      this.graphics.fillStyle(this.pieceGraphicsMap[piece.type]);
-      this.graphics.fillRectShape(piece.rect);
-    }
-  }
-
-  prepareDrawingPieces(pieces) {
-    for (const piece of pieces) {
-      const rect = {
-        type: piece.type,
-        rect: 0,
-      };
-
-      rect.rect = new Phaser.Geom.Rectangle(
-        24 + 32 * piece.x,
-        24 + 32 * piece.y,
-        16,
-        16
-      );
-
-      this.pieceRects.push(rect);
-    }
-  }
-
   drawDefeatMessage() {
     this.graphics.fillStyle(0xff0000);
     this.graphics.fillRectShape(this.gridOverlay);
     this.defeatMessage.setVisible(true);
   }
-  
+
   drawVictoryMessage() {
     this.graphics.fillStyle(0x0000ff);
     this.graphics.fillRectShape(this.gridOverlay);

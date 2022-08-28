@@ -1,10 +1,41 @@
-import {
-  PieceType,
-  Piece,
-  Direction,
-  DijkstraMap,
-  Board,
-} from "../src/board.js";
+import { DijkstraMap, Board } from "../src/board.js";
+
+import { PieceType, Piece, Direction } from "../src/constants/piece.js";
+
+import PuzzleScene from "../src/scenes/puzzle.js";
+
+scene;
+
+beforeEach(() => {
+  const config = {
+    type: Phaser.AUTO,
+    background: "#000000",
+    render: {
+      pixelArt: true,
+    },
+    scale: {
+      //mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: 640,
+      height: 360,
+      parent: "game",
+    },
+    callbacks: {
+      postBoot: function () {
+        game.loop.stop();
+        scene = game.scene.getScene("PuzzleScene");
+      },
+    },
+    scene: [PuzzleScene],
+  };
+
+  const game = new Phaser.Game(config);
+});
+
+afterEach(() => {
+  game.destroy(true, true);
+  game.runDestroy();
+});
 
 test("piece constructor", () => {
   const piece = new Piece(PieceType.Wizard, 2, 4);
@@ -14,7 +45,7 @@ test("piece constructor", () => {
 });
 
 test("board constructor", () => {
-  const board = new Board(4, 7);
+  const board = new Board(scene, 4, 7);
   expect(board.width).toBe(4);
   expect(board.height).toBe(7);
   expect(board.allies.length).toBe(0);
@@ -23,7 +54,7 @@ test("board constructor", () => {
 });
 
 test("update board state after player inputs action", () => {
-  const board = new Board(4, 6);
+  const board = new Board(scene, 4, 6);
   board.addPiece(PieceType.Wall, 0, 2);
   board.addPiece(PieceType.Warrior, 0, 3);
 
@@ -47,7 +78,7 @@ test("update board state after player inputs action", () => {
 });
 
 test("add a piece to board", () => {
-  const board = new Board(4, 6);
+  const board = new Board(scene, 4, 6);
   board.addPiece(PieceType.Thief, 2, 5);
 
   expect(board.allies.length).toBe(1);
@@ -78,7 +109,7 @@ test("add a piece to board", () => {
 });
 
 test("remove a piece from board", () => {
-  const board = new Board(4, 6);
+  const board = new Board(scene, 4, 6);
   board.addPiece(PieceType.Thief, 2, 5);
   board.addPiece(PieceType.Skeleton, 3, 3);
   board.addPiece(PieceType.Wall, 2, 1);
@@ -108,7 +139,7 @@ test("make a dijkstra map to target", () => {
     [2, 1, 0, 1],
   ];
 
-  const board = new Board(4, 6);
+  const board = new Board(scene, 4, 6);
 
   board.addPiece(PieceType.Thief, 2, 5);
   board.addPiece(PieceType.Skeleton, 3, 3);

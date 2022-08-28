@@ -1,113 +1,15 @@
-import { tuplify } from "./Tuple.js";
-
-const PieceType = {
-  OffBoard: 0,
-  Empty: 1,
-  Wall: 2,
-
-  Warrior: 3,
-  Thief: 4,
-  Wizard: 5,
-
-  Skeleton: 6,
-  Slime: 7,
-
-  Treasure: 8,
-};
-
-const AllySet = new Set([PieceType.Warrior, PieceType.Thief, PieceType.Wizard]);
-const EnemySet = new Set([PieceType.Skeleton, PieceType.Slime]);
-
-const Direction = {
-  Up: 0,
-  Down: 1,
-  Left: 2,
-  Right: 3,
-  UpLeft: 4,
-  UpRight: 5,
-  DownLeft: 6,
-  DownRight: 7
-};
-
-const MoveMapX = {};
-MoveMapX[Direction.Up] = 0;
-MoveMapX[Direction.Down] = 0;
-MoveMapX[Direction.Left] = -1;
-MoveMapX[Direction.Right] = 1;
-MoveMapX[Direction.UpLeft] = -1;
-MoveMapX[Direction.UpRight] = 1;
-MoveMapX[Direction.DownLeft] = -1;
-MoveMapX[Direction.DownRight] = 1;
-
-const MoveMapY = {};
-MoveMapY[Direction.Up] = -1;
-MoveMapY[Direction.Down] = 1;
-MoveMapY[Direction.Left] = 0;
-MoveMapY[Direction.Right] = 0;
-MoveMapY[Direction.UpLeft] = 1;
-MoveMapY[Direction.UpRight] = 1;
-MoveMapY[Direction.DownLeft] = -1;
-MoveMapY[Direction.DownRight] = -1;
-
-const StandardMoveSet = [Direction.Up, Direction.Down, Direction.Left, Direction.Right];
-const DiagonalMoveSet = [Direction.Up, Direction.Down, Direction.Left, Direction.Right, Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight];
-
-const Interaction = {
-  None: 0,
-  Move: 1,
-  Kill: 2,
-  Dies: 3,
-  Wins: 4,
-};
-
-const InteractionTable = {};
-InteractionTable[tuplify(PieceType.Warrior, PieceType.Empty)] =
-  Interaction.Move;
-InteractionTable[tuplify(PieceType.Warrior, PieceType.Skeleton)] =
-  Interaction.Kill;
-  InteractionTable[tuplify(PieceType.Warrior, PieceType.Slime)] =
-  Interaction.Kill;
-InteractionTable[tuplify(PieceType.Warrior, PieceType.Treasure)] =
-  Interaction.Wins;
-
-InteractionTable[tuplify(PieceType.Thief, PieceType.Empty)] = Interaction.Move;
-InteractionTable[tuplify(PieceType.Thief, PieceType.Skeleton)] =
-  Interaction.Dies;
-  InteractionTable[tuplify(PieceType.Thief, PieceType.Slime)] =
-  Interaction.Dies;
-InteractionTable[tuplify(PieceType.Thief, PieceType.Treasure)] =
-  Interaction.Wins;
-
-InteractionTable[tuplify(PieceType.Wizard, PieceType.Empty)] = Interaction.Move;
-InteractionTable[tuplify(PieceType.Wizard, PieceType.Skeleton)] =
-  Interaction.Dies;
-InteractionTable[tuplify(PieceType.Wizard, PieceType.Slime)] =
-  Interaction.Dies;
-InteractionTable[tuplify(PieceType.Wizard, PieceType.Treasure)] =
-  Interaction.Wins;
-
-InteractionTable[tuplify(PieceType.Skeleton, PieceType.Empty)] =
-  Interaction.Move;
-InteractionTable[tuplify(PieceType.Skeleton, PieceType.Warrior)] =
-  Interaction.Dies;
-InteractionTable[tuplify(PieceType.Skeleton, PieceType.Thief)] =
-  Interaction.Kill;
-InteractionTable[tuplify(PieceType.Skeleton, PieceType.Wizard)] =
-  Interaction.Kill;
-InteractionTable[tuplify(PieceType.Skeleton, PieceType.Treasure)] =
-  Interaction.Move;
-
-class Piece {
-  type;
-  x;
-  y;
-
-  constructor(type, x, y) {
-    this.type = type;
-    this.x = x;
-    this.y = y;
-  }
-}
+import { tuplify } from "./tuple.js";
+import {
+  PieceType,
+  AllySet,
+  EnemySet,
+  Direction,
+  MoveMapX,
+  MoveMapY,
+  Interaction,
+  InteractionTable,
+  Piece,
+} from "./constants/piece.js";
 
 class DijkstraMap {
   map;
@@ -219,7 +121,9 @@ class DijkstraMap {
   }
 }
 
-class Board {
+class Board extends Phaser.Scene {
+  scene;
+
   width;
   height;
 
@@ -229,13 +133,33 @@ class Board {
 
   state;
 
-  constructor(width, height) {
+  spriteSize = 32;
+  spriteXOffset = 32;
+  spriteYOffset = 32;
+
+  constructor(scene, width, height) {
+    super(scene);
+
+    this.scene = scene;
+    this.scene.add.existing(this);
+
     this.width = width;
     this.height = height;
 
     this.allies = [];
     this.enemies = [];
     this.objects = [];
+
+    this.pieceGraphicsMap = new Map();
+    this.pieceGraphicsMap.set(PieceType.OffBoard, null);
+    this.pieceGraphicsMap.set(PieceType.Empty, null);
+    this.pieceGraphicsMap.set(PieceType.Wall, 9);
+    this.pieceGraphicsMap.set(PieceType.Warrior, 146);
+    this.pieceGraphicsMap.set(PieceType.Thief, 144);
+    this.pieceGraphicsMap.set(PieceType.Wizard, 151);
+    this.pieceGraphicsMap.set(PieceType.Skeleton, 178);
+    this.pieceGraphicsMap.set(PieceType.Slime, 169);
+    this.pieceGraphicsMap.set(PieceType.Treasure, 32);
 
     this.state = "playing";
   }
@@ -264,7 +188,12 @@ class Board {
       const map = new DijkstraMap(
         this,
         [PieceType.Warrior, PieceType.Thief, PieceType.Wizard],
-        [PieceType.Wall, PieceType.Skeleton]
+        [
+          PieceType.Wall,
+          PieceType.Skeleton,
+          PieceType.Slime,
+          PieceType.Treasure,
+        ]
       );
 
       if (enemy.type === PieceType.Skeleton) {
@@ -283,7 +212,6 @@ class Board {
 
         if (target > -1) {
           const enemyDirection = map.getDirection(index, target);
-          console.log("Direction:", enemyDirection);
           this.movePiece(enemy, enemyDirection);
         }
       }
@@ -353,6 +281,13 @@ class Board {
       default:
         break;
     }
+
+    if (piece.sprite === null) {
+      return;
+    }
+
+    piece.sprite.x = piece.x * this.spriteSize + this.spriteXOffset;
+    piece.sprite.y = piece.y * this.spriteSize + this.spriteYOffset;
   }
 
   addPiece(pieceType, x, y) {
@@ -361,7 +296,13 @@ class Board {
       return;
     }
 
-    let piece = new Piece(pieceType, x, y);
+    const sprite = this.scene.add.sprite(
+      x * this.spriteSize + this.spriteXOffset,
+      y * this.spriteSize + this.spriteYOffset,
+      "sprites",
+      this.pieceGraphicsMap.get(pieceType)
+    );
+    let piece = new Piece(pieceType, x, y, sprite);
 
     if (AllySet.has(pieceType)) {
       this.allies.push(piece);
@@ -369,7 +310,28 @@ class Board {
       this.enemies.push(piece);
     } else {
       this.objects.push(piece);
+      console.log(this.objects);
     }
+  }
+
+  removeSprite(piece) {
+    if (piece.sprite !== null) {
+      piece.sprite.destroy(true);
+      piece.sprite = null;
+    }
+  }
+
+  removePieceFromArray(x, y, pieces) {
+    for (let i = 0; i < pieces.length; i++) {
+      const piece = pieces[i];
+      if (piece.x === x && piece.y === y) {
+        this.removeSprite(pieces[i]);
+        pieces.splice(i, 1);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   removePiece(x, y) {
@@ -377,28 +339,14 @@ class Board {
       return;
     }
 
-    for (let i = 0; i < this.allies.length; i++) {
-      const ally = this.allies[i];
-      if (ally.x === x && ally.y === y) {
-        this.allies.splice(i);
-        return;
-      }
+    if (this.removePieceFromArray(x, y, this.allies)) {
+      return;
     }
-
-    for (let i = 0; i < this.enemies.length; i++) {
-      const enemy = this.enemies[i];
-      if (enemy.x === x && enemy.y === y) {
-        this.enemies.splice(i);
-        return;
-      }
+    if (this.removePieceFromArray(x, y, this.enemies)) {
+      return;
     }
-
-    for (let i = 0; i < this.objects.length; i++) {
-      const object = this.objects[i];
-      if (object.x === x && object.y === y) {
-        this.objects.splice(i);
-        return;
-      }
+    if (this.removePieceFromArray(x, y, this.objects)) {
+      return;
     }
   }
 
@@ -407,4 +355,4 @@ class Board {
   }
 }
 
-export { PieceType, AllySet, EnemySet, Direction, Piece, DijkstraMap, Board };
+export { DijkstraMap, Board };
