@@ -1,5 +1,5 @@
-import { PieceType, EnemySet, Direction, Piece } from "./../constants/piece.js";
-import { Board } from "./../board.js";
+import { PieceType, EnemySet, Direction, Piece } from "../board/piece.js";
+import { Board } from "../board/board.js";
 import { TextButton } from "../gui/text-button.js";
 
 class PuzzleScene extends Phaser.Scene {
@@ -31,7 +31,7 @@ class PuzzleScene extends Phaser.Scene {
 
   create() {
     //this.add.image(0, 0, "sprites");
-    this.board = new Board(this, 8, 4);
+    this.board = new Board(this, 8, 8);
     this.board.addPiece(PieceType.Thief, 1, 1);
     this.board.addPiece(PieceType.Wall, 4, 3);
     this.board.addPiece(PieceType.Skeleton, 7, 3);

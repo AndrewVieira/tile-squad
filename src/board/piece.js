@@ -1,4 +1,4 @@
-import { tuplify } from "./../tuple.js";
+import { tuplify } from "../utils/tuple.js";
 
 const PieceType = {
   OffBoard: 0,
@@ -55,6 +55,7 @@ const StandardMoveSet = [
   Direction.Left,
   Direction.Right,
 ];
+
 const DiagonalMoveSet = [
   Direction.Up,
   Direction.Down,
@@ -75,6 +76,7 @@ const Interaction = {
 };
 
 const InteractionTable = {};
+  
 InteractionTable[tuplify(PieceType.Warrior, PieceType.Empty)] =
   Interaction.Move;
 InteractionTable[tuplify(PieceType.Warrior, PieceType.Skeleton)] =

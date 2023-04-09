@@ -1,4 +1,4 @@
-import { tuplify, Tuple } from "../src/tuple.js";
+import { tuplify, Tuple } from "../src/utils/tuple.js";
 
 test("create tuple string with tuplify", () => {
   const tuple = tuplify(1, 2, 3);

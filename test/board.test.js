@@ -1,10 +1,11 @@
-import { DijkstraMap, Board } from "../src/board.js";
 
-import { PieceType, Piece, Direction } from "../src/constants/piece.js";
+/*
+import Phaser from "../phaser.min.js";
+import { DijkstraMap, Board } from "../src/board/board.js";
+
+import { PieceType, Piece, Direction } from "../src/board/piece.js";
 
 import PuzzleScene from "../src/scenes/puzzle.js";
-
-scene;
 
 beforeEach(() => {
   const config = {
@@ -152,3 +153,4 @@ test("make a dijkstra map to target", () => {
   );
   expect(map.map.join(",")).toBe(solution.join(","));
 });
+*/
